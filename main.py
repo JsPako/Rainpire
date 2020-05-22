@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 import time
+import pkg_resources.py2_warn
+from datetime import datetime
 from PIL import Image, ImageGrab
 from pynput.mouse import Button, Controller
 
@@ -28,6 +30,12 @@ def colourMatch(masked_image):
                            cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     pixels = cv2.countNonZero(thresh)
     if pixels >= 500:
+        now = datetime.now().time()
+        current_time = now.strftime("%H:%M:%S")
+        print("Found Rain at", current_time)
+        file = open("RainTime.txt","a+")
+        file.write(current_time)
+        file.close()
         mouseMove()
     else:
         return True
@@ -47,9 +55,10 @@ while timer < 15000000:
     timer = timer + 1
     if timer == 1:
         screen = np.array(ImageGrab.grab(bbox=(97, 927, 167, 957)))
-        cv2.imshow('view', screen)
-        rgb = cv2.cvtColor(screen, cv2.COLOR_BGR2HSV)
-        processImage(rgb)
+        rgb = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+        cv2.imshow('view', rgb)
+        hsv = cv2.cvtColor(screen, cv2.COLOR_RGB2HSV)
+        processImage(hsv)
         if cv2.waitKey(25) & 0xFF == ord("q"):
             cv2.destroyAllWindows()
             break
